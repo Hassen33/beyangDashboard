@@ -1,15 +1,18 @@
-import {
-  AuthBindings,
-  Authenticated,
-  GitHubBanner,
-  Refine,
-} from "@refinedev/core";
+import { AuthBindings, Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
+// importing  icons
+import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
+import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
+import PeopleAltOutlined from "@mui/icons-material/PeopleAltOutlined";
+import StarOutlineRounded from "@mui/icons-material/StarOutlineRounded";
+import VillaOutlined from "@mui/icons-material/VillaOutlined";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 
 import {
   ErrorComponent,
   notificationProvider,
   RefineSnackbarProvider,
+  Sider,
   ThemedLayoutV2,
 } from "@refinedev/mui";
 
@@ -36,13 +39,15 @@ import {
   CategoryList,
   CategoryShow,
 } from "pages/categories";
-import { Login } from "pages/login";
+import { Login, Home, AllProperties, CreateProperty } from "pages";
+import SignUp from "pages/signUp";
 import { useTranslation } from "react-i18next";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { parseJwt } from "utils/parse-jwt";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-
+import { MuiInferencer } from "@refinedev/inferencer/mui";
+// import CustomSider from "components/CustomSider";
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((request: AxiosRequestConfig) => {
   const token = localStorage.getItem("token");
@@ -144,7 +149,6 @@ function App() {
 
   return (
     <BrowserRouter>
-      <GitHubBanner />
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <CssBaseline />
@@ -157,6 +161,12 @@ function App() {
               authProvider={authProvider}
               i18nProvider={i18nProvider}
               resources={[
+                {
+                  name: "",
+                  list: MuiInferencer,
+                  icon: <DashboardIcon />,
+                  options: { label: "Dashboard" },
+                },
                 {
                   name: "blog_posts",
                   list: "/blog-posts",
@@ -177,6 +187,35 @@ function App() {
                     canDelete: true,
                   },
                 },
+                {
+                  name: "properties",
+                  list: AllProperties,
+                  // show: PropertyDetails,
+                  create: CreateProperty,
+                  // edit: EditProperty,
+                  icon: <VillaOutlined />,
+                },
+                {
+                  name: "agent",
+                  list: MuiInferencer,
+                  icon: <PeopleAltOutlined />,
+                },
+                {
+                  name: "review",
+                  list: MuiInferencer,
+                  icon: <StarOutlineRounded />,
+                },
+                {
+                  name: "message",
+                  list: MuiInferencer,
+                  icon: <ChatBubbleOutline />,
+                },
+                {
+                  name: "my-profile",
+                  list: MuiInferencer,
+                  icon: <AccountCircleOutlined />,
+                  options: { label: "My Profile" },
+                },
               ]}
               options={{
                 syncWithLocation: true,
@@ -184,6 +223,53 @@ function App() {
               }}
             >
               <Routes>
+                {/* root home */}
+                <Route
+                  index
+                  path="/"
+                  element={
+                    <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                      <ThemedLayoutV2
+                        // Sider={()=><CustomSider />}
+                        Header={() => <Header isSticky={true} />}
+                      >
+                        <Outlet />
+                        <Home />
+                      </ThemedLayoutV2>
+                    </Authenticated>
+                  }
+                />
+                {/* properties root */}
+                <Route path="/properties">
+                  <Route
+                    index
+                    element={
+                      <Authenticated
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <ThemedLayoutV2
+                          // Sider={()=><CustomSider />}
+                          Header={() => <Header isSticky={true} />}
+                        >
+                          <Outlet />
+                          <AllProperties />
+                        </ThemedLayoutV2>
+                      </Authenticated>
+                    }
+                  />
+                  <Route path="create" element={
+                      <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                      <ThemedLayoutV2 Header={() => <Header isSticky={true} />}>
+                        <Outlet />
+                      <CreateProperty />
+                      </ThemedLayoutV2>
+                    </Authenticated>
+
+                  } />
+
+                </Route>
+
+
                 <Route
                   element={
                     <Authenticated fallback={<CatchAllNavigate to="/login" />}>
@@ -219,6 +305,7 @@ function App() {
                   }
                 >
                   <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
                 </Route>
               </Routes>
 
